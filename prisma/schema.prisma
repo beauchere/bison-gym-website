@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../../node_modules/.prisma/client"
+  output = "../../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -9,59 +9,60 @@ datasource db {
 }
 
 model User {
-  id               String         @id @default(uuid())
-  name             String
-  email            String         @unique
-  passwordHash     String
-  role             String // admin, trainer, member
-  membershipStatus String? // active, expired
-  membershipType   String? // basic, premium
-  bookings         Booking[]      @relation("UserBookings")
-  payments         Payment[]      @relation("UserPayments")
-  notifications    Notification[] @relation("UserNotifications")
-  memberships      Membership[]   @relation("UserMemberships")
+  id              String   @id @default(uuid())
+  name            String
+  email           String   @unique
+  passwordHash    String
+  role            String   // admin, trainer, member
+  membershipStatus String?  // active, expired
+  membershipType  String?  // basic, premium
+  bookings        Booking[] @relation("UserBookings")
+  payments        Payment[] @relation("UserPayments")
+  notifications   Notification[] @relation("UserNotifications")
+  memberships     Membership[] @relation("UserMemberships")
 }
 
 model Trainer {
-  id             String    @id @default(uuid())
-  name           String
+  id            String   @id @default(uuid())
+  name          String
   specialization String[]
-  availability   Json[] // Store time slots as JSON
-  bookings       Booking[] @relation("TrainerBookings")
+  availability  Json[]   // Store time slots as JSON
+  bookings      Booking[] @relation("TrainerBookings")
 }
 
 model Booking {
-  id          String     @id @default(uuid())
+  id          String   @id @default(uuid())
   userId      String
   trainerId   String?
   equipmentId String?
   date        DateTime
   time        String
-  status      String // confirmed, cancelled, pending
-  user        User       @relation("UserBookings", fields: [userId], references: [id])
-  trainer     Trainer?   @relation("TrainerBookings", fields: [trainerId], references: [id])
+  status      String   // confirmed, cancelled, pending
+  user        User     @relation("UserBookings", fields: [userId], references: [id])
+  trainer     Trainer? @relation("TrainerBookings", fields: [trainerId], references: [id])
   equipment   Equipment? @relation("EquipmentBookings", fields: [equipmentId], references: [id])
-  Payment     Payment[]
+  payment     Payment?  @relation(fields: [id], references: [bookingId]) // Add this line
 }
 
+
 model Equipment {
-  id                 String    @id @default(uuid())
-  name               String
-  status             String // available, in-use, maintenance
+  id               String   @id @default(uuid())
+  name             String
+  status           String   // available, in-use, maintenance
   maintenanceHistory Json[] // Store maintenance logs
-  bookings           Booking[] @relation("EquipmentBookings")
+  bookings         Booking[] @relation("EquipmentBookings")
 }
 
 model Payment {
-  id              String   @id @default(uuid())
-  userId          String
-  bookingId       String?
-  amount          Float
-  paymentMethod   String // credit_card, paypal, bank_transfer
+  id             String   @id @default(uuid())
+  userId         String
+  bookingId      String?
+  amount         Float
+  paymentMethod  String   // credit_card, paypal, bank_transfer
   transactionDate DateTime
-  status          String // completed, failed, pending
-  user            User     @relation("UserPayments", fields: [userId], references: [id])
-  booking         Booking? @relation(fields: [bookingId], references: [id])
+  status         String   // completed, failed, pending
+  user           User     @relation("UserPayments", fields: [userId], references: [id])
+  booking        Booking? @relation(fields: [bookingId], references: [id])
 }
 
 model Notification {
@@ -74,10 +75,10 @@ model Notification {
 }
 
 model Membership {
-  id         String   @id @default(uuid())
-  userId     String
-  type       String // basic, premium
-  status     String // active, expired
+  id        String   @id @default(uuid())
+  userId    String
+  type      String   // basic, premium
+  status    String   // active, expired
   expiryDate DateTime
-  user       User     @relation("UserMemberships", fields: [userId], references: [id])
+  user      User     @relation("UserMemberships", fields: [userId], references: [id])
 }
