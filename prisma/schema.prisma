@@ -13,3 +13,77 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id               String         @id @default(uuid())
+  name             String
+  email            String         @unique
+  passwordHash     String
+  role             String // admin, trainer, member
+  membershipStatus String? // active, expired
+  membershipType   String? // basic, premium
+  bookings         Booking[]      @relation("UserBookings")
+  payments         Payment[]      @relation("UserPayments")
+  notifications    Notification[] @relation("UserNotifications")
+  memberships      Membership[]   @relation("UserMemberships")
+}
+
+model Trainer {
+  id             String    @id @default(uuid())
+  name           String
+  specialization String[]
+  availability   Json[] // Store time slots as JSON
+  bookings       Booking[] @relation("TrainerBookings")
+}
+
+model Booking {
+  id          String     @id @default(uuid())
+  userId      String
+  trainerId   String?
+  equipmentId String?
+  date        DateTime
+  time        String
+  status      String // confirmed, cancelled, pending
+  user        User       @relation("UserBookings", fields: [userId], references: [id])
+  trainer     Trainer?   @relation("TrainerBookings", fields: [trainerId], references: [id])
+  equipment   Equipment? @relation("EquipmentBookings", fields: [equipmentId], references: [id])
+  payment     Payment?   @relation("BookingPayment")
+}
+
+model Equipment {
+  id                 String    @id @default(uuid())
+  name               String
+  status             String // available, in-use, maintenance
+  maintenanceHistory Json[] // Store maintenance logs
+  bookings           Booking[] @relation("EquipmentBookings")
+}
+
+model Payment {
+  id              String   @id @default(uuid())
+  userId          String
+  bookingId       String?  @unique
+  amount          Float
+  paymentMethod   String // credit_card, paypal, bank_transfer
+  transactionDate DateTime
+  status          String // completed, failed, pending
+  user            User     @relation("UserPayments", fields: [userId], references: [id])
+  booking         Booking? @relation("BookingPayment", fields: [bookingId], references: [id])
+}
+
+model Notification {
+  id      String   @id @default(uuid())
+  userId  String
+  message String
+  date    DateTime
+  read    Boolean  @default(false)
+  user    User     @relation("UserNotifications", fields: [userId], references: [id])
+}
+
+model Membership {
+  id         String   @id @default(uuid())
+  userId     String
+  type       String // basic, premium
+  status     String // active, expired
+  expiryDate DateTime
+  user       User     @relation("UserMemberships", fields: [userId], references: [id])
+}
