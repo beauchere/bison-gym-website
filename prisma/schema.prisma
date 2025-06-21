@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output    = "../../node_modules/.prisma/client"
+  output   = "../../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -13,20 +13,20 @@ model User {
   name             String
   email            String         @unique
   passwordHash     String
-  role             String
-  membershipStatus String?
-  membershipType   String?
+  role             String // admin, trainer, member
+  membershipStatus String? // active, expired
+  membershipType   String? // basic, premium
   bookings         Booking[]      @relation("UserBookings")
-  memberships      Membership[]   @relation("UserMemberships")
-  notifications    Notification[] @relation("UserNotifications")
   payments         Payment[]      @relation("UserPayments")
+  notifications    Notification[] @relation("UserNotifications")
+  memberships      Membership[]   @relation("UserMemberships")
 }
 
 model Trainer {
   id             String    @id @default(uuid())
   name           String
   specialization String[]
-  availability   Json[]
+  availability   Json[] // Store time slots as JSON
   bookings       Booking[] @relation("TrainerBookings")
 }
 
@@ -37,31 +37,31 @@ model Booking {
   equipmentId String?
   date        DateTime
   time        String
-  status      String
-  equipment   Equipment? @relation("EquipmentBookings", fields: [equipmentId], references: [id])
-  trainer     Trainer?   @relation("TrainerBookings", fields: [trainerId], references: [id])
+  status      String // confirmed, cancelled, pending
   user        User       @relation("UserBookings", fields: [userId], references: [id])
-  payment     Payment?   @relation("BookingPayment")
+  trainer     Trainer?   @relation("TrainerBookings", fields: [trainerId], references: [id])
+  equipment   Equipment? @relation("EquipmentBookings", fields: [equipmentId], references: [id])
+  Payment     Payment[]
 }
 
 model Equipment {
   id                 String    @id @default(uuid())
   name               String
-  status             String
-  maintenanceHistory Json[]
+  status             String // available, in-use, maintenance
+  maintenanceHistory Json[] // Store maintenance logs
   bookings           Booking[] @relation("EquipmentBookings")
 }
 
 model Payment {
   id              String   @id @default(uuid())
   userId          String
-  bookingId       String?  @unique
+  bookingId       String?
   amount          Float
-  paymentMethod   String
+  paymentMethod   String // credit_card, paypal, bank_transfer
   transactionDate DateTime
-  status          String
-  booking         Booking? @relation("BookingPayment", fields: [bookingId], references: [id])
+  status          String // completed, failed, pending
   user            User     @relation("UserPayments", fields: [userId], references: [id])
+  booking         Booking? @relation(fields: [bookingId], references: [id])
 }
 
 model Notification {
@@ -76,8 +76,8 @@ model Notification {
 model Membership {
   id         String   @id @default(uuid())
   userId     String
-  type       String
-  status     String
+  type       String // basic, premium
+  status     String // active, expired
   expiryDate DateTime
   user       User     @relation("UserMemberships", fields: [userId], references: [id])
 }
