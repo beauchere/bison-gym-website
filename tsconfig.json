@@ -8,6 +8,7 @@
     "noEmit": false,
     "esModuleInterop": true,
     "module": "esnext",
+    "typeRoots": ["./types", "./node_modules/@types"],
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -25,6 +26,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "scripts/**/*", "app/**/*"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "scripts/**/*", "app/**/*", "src/app/api", "src/app/login"],
   "exclude": ["node_modules", "dist"]
 }
